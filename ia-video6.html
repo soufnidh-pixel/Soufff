@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Packshot Produit</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,Arial,sans-serif;background:#f7f8fa;color:#0f172a;padding:1.2rem 1rem 5rem;font-size:15px;max-width:760px;margin:0 auto}
+h1{font-size:1.3rem;text-align:center;margin-bottom:.2rem}
+.sub{font-size:.78rem;color:#64748b;text-align:center;font-style:italic;margin-bottom:1rem}
+.info{background:#eef2ff;border-left:3px solid #2563eb;padding:.7rem .9rem;border-radius:8px;font-size:.78rem;margin-bottom:1rem}
+.panel{background:#fff;border:1px solid #e3e6ec;border-radius:12px;padding:1rem;margin-bottom:1rem}
+.panel.ok{border-color:#059669}.panel.err{border-color:#dc2626}.panel.hard{border-color:#2563eb;background:#eef2ff}
+input,textarea,select{width:100%;padding:.7rem .85rem;border-radius:8px;border:1px solid #e3e6ec;background:#fafbfc;font-family:inherit;font-size:.88rem;margin-bottom:.5rem}
+textarea{min-height:70px;resize:vertical}
+button{cursor:pointer;font-family:inherit}
+.btn{width:100%;padding:.85rem;border-radius:8px;border:none;background:#0f172a;color:#fff;font-size:.9rem;font-weight:600;margin-bottom:.5rem}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btn-stop{background:transparent;border:1px solid #dc2626;color:#dc2626;display:none}.btn-stop.vis{display:block}
+.status{font-size:.75rem;padding:.55rem .85rem;border-radius:6px;background:#f1f3f6;color:#64748b;display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;word-break:break-all}
+.status.ok{background:#ecfdf5;color:#059669;font-weight:600}
+.status.err{background:#fef2f2;color:#dc2626;font-weight:600}
+.status.hard{background:#eef2ff;color:#2563eb;font-weight:600}
+.dot{width:8px;height:8px;border-radius:50%;background:#94a3b8;flex-shrink:0}
+.status.ok .dot{background:#059669}.status.err .dot{background:#dc2626}.status.hard .dot{background:#2563eb}
+.upload{border:2px dashed #cbd5e1;border-radius:12px;padding:1.5rem 1rem;text-align:center;cursor:pointer;background:#fff;margin-bottom:1rem}
+.upload input{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:.5rem;margin-bottom:1rem}
+.card{position:relative;border-radius:8px;overflow:hidden;border:1px solid #e3e6ec;aspect-ratio:1/1;background:#f0f0f0}
+.card img{width:100%;height:100%;object-fit:cover;display:block}
+.rm{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.65);color:#fff;border:none;width:20px;height:20px;border-radius:50%;font-size:10px}
+.styles{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.4rem}
+.sc{padding:.6rem .7rem;border-radius:8px;border:1px solid #e3e6ec;background:#f1f3f6;cursor:pointer;display:flex;align-items:center;gap:.4rem;font-size:.78rem}
+.sc.sel{background:#0f172a;color:#fff;border-color:#0f172a}
+.none{grid-column:1/-1;padding:.7rem;border-radius:8px;border:2px dashed #cbd5e1;text-align:center;font-size:.8rem;color:#64748b;cursor:pointer;margin-bottom:.4rem}
+.none.sel{border-color:#0f172a;border-style:solid;background:#f1f3f6;color:#0f172a;font-weight:600}
+.presets{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.5rem}
+.pp{padding:.3rem .6rem;border-radius:14px;border:1px solid #e3e6ec;background:#f1f3f6;font-size:.7rem;cursor:pointer}
+.qs{background:#fff;border:1px solid #e3e6ec;border-radius:10px;padding:.6rem .8rem;margin-bottom:.4rem;font-size:.78rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.4rem}
+.qi{display:flex;align-items:center;gap:.6rem;padding:.6rem .7rem;border-radius:8px;border:1px solid #e3e6ec;margin-bottom:.3rem;background:#fff;font-size:.8rem}
+.qi.pending{opacity:.5}.qi.creating{border-color:#d97706}.qi.processing{border-color:#2563eb}.qi.done{border-color:#059669}.qi.failed{border-color:#dc2626}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.7rem;margin-top:1rem}
+.gi{border-radius:12px;overflow:hidden;border:1px solid #e3e6ec;background:#000}
+.gi video{width:100%;display:block;aspect-ratio:1/1;object-fit:cover}
+.gc{padding:.5rem .6rem;background:#fff;font-size:.7rem;color:#64748b;display:flex;justify-content:space-between;align-items:center}
+.gd{background:#2563eb;color:#fff;border:none;padding:.2rem .5rem;border-radius:5px;font-size:.62rem;font-weight:700}
+.sbar{position:fixed;bottom:0;left:0;right:0;background:#0f172a;color:#fff;padding:.7rem 1rem;font-size:.78rem;font-weight:600;display:flex;align-items:center;gap:.5rem;transform:translateY(100%);transition:transform .3s;z-index:100}
+.sbar.vis{transform:translateY(0)}
+.sp{width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;top:1rem;left:50%;transform:translateX(-50%) translateY(-100px);background:#0f172a;color:#fff;padding:.75rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;z-index:1000;opacity:0;transition:all .3s;max-width:90vw;text-align:center}
+.toast.vis{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.ok{background:#059669}.toast.err{background:#dc2626}.toast.warn{background:#d97706}
+label{display:block;font-size:.7rem;color:#64748b;text-transform:uppercase;font-weight:700;margin-bottom:.3rem;margin-top:.6rem}
+#nc,#nv{position:fixed;top:0;left:0;width:1px;height:1px;opacity:.01;pointer-events:none;z-index:-1}
+</style>
+</head>
+<body>
+<h1>Packshot Produit</h1>
+<p class="sub">Vos produits en mouvement — e-commerce & catalogue</p>
+<div class="info"><strong>Mode packshot :</strong> chaque photo devient une vidéo pro. Format 1:1.</div>
+
+<div class="panel" id="ap">
+<input type="password" id="ak" placeholder="Collez votre clé API (sk-...)" autocomplete="off">
+<button class="btn" id="as" type="button">Enregistrer la clé</button>
+<div class="status" id="ast"><span class="dot"></span><span id="astx">Aucune clé API enregistrée</span></div>
+<div style="font-size:.7rem;color:#64748b;margin-top:.4rem">Clé sur <a href="https://platform.agnes-ai.com" target="_blank">platform.agnes-ai.com</a></div>
+</div>
+
+<div class="upload" id="uz"><input type="file" id="fi" accept="image/*" multiple><div style="font-size:2rem;opacity:.5;margin-bottom:.4rem">＋</div><div style="font-weight:600">Ajoutez vos packshots</div><div style="font-size:.75rem;color:#64748b">Chaque produit devient une vidéo</div></div>
+<div class="grid" id="ig"></div>
+
+<div class="panel">
+<div style="font-size:.75rem;font-weight:700;text-transform:uppercase;color:#64748b;margin-bottom:.5rem">Description produit</div>
+<div class="presets" id="pp"></div>
+<textarea id="mp" placeholder="Décrivez votre produit et l'ambiance souhaitée..."></textarea>
+</div>
+
+<div class="panel">
+<div style="font-size:.75rem;font-weight:700;text-transform:uppercase;color:#64748b;margin-bottom:.5rem">Style packshot</div>
+<div class="styles" id="sg"></div>
+</div>
+
+<div class="panel">
+<div style="font-size:.75rem;font-weight:700;text-transform:uppercase;color:#64748b;margin-bottom:.5rem">Réglages</div>
+<label>Durée</label>
+<select id="ds"><option value="121">5 secondes</option><option value="153" selected>6,4 secondes</option><option value="241">10 secondes</option></select>
+<label>Intensité</label>
+<select id="is"><option value="subtle" selected>Subtile (luxe)</option><option value="moderate">Modérée (e-commerce)</option><option value="strong">Forte (tech, sport)</option></select>
+</div>
+
+<button class="btn" id="gb" type="button" disabled>Créer les vidéos</button>
+<button class="btn btn-stop" id="sb" type="button">Arrêter</button>
+<div id="q"></div>
+<div id="gal" style="display:none"><div style="font-size:.75rem;font-weight:700;text-transform:uppercase;color:#64748b;margin:1rem 0 .6rem">Vidéos générées</div><div class="gal" id="gg"></div></div>
+
+<div class="sbar" id="sbar"><div class="sp"></div><span id="stx">Préparation…</span></div>
+<div class="toast" id="toast"><span id="ttx">Message</span></div>
+<canvas id="nc" width="2" height="2"></canvas>
+<video id="nv" playsinline muted loop></video>
+
+<script>
+// ============================================================
+// CLE API EN DUR - colle ta clé entre les guillemets si tu veux
+// ============================================================
+var HARDCODED_API_KEY = '';
+
+var API='https://apihub.agnes-ai.com/v1';
+var POLL='https://apihub.agnes-ai.com/agnesapi';
+var MODEL='agnes-video-v2.0';
+var FPS=24;
+var POLL_S=8,MAX_POLL=100;
+var KEY_LS='agnes_key_pack_v4';
+var MAXSZ=12*1024*1024,THW=200,MAXQ=30;
+
+var MEM_KEY='';
+var STORAGE_OK=true;
+try{localStorage.setItem('__t','1');localStorage.removeItem('__t');}catch(e){STORAGE_OK=false;}
+
+var state={imgs:[],running:false,stop:false,queue:[],done:0,fail:0,effect:null,prompt:'',frames:153,intensity:'subtle',loading:false};
+
+var tT=null;
+function toast(m,t,d){t=t||'ok';d=d||2500;var e=document.getElementById('toast'),x=document.getElementById('ttx');if(!e)return;e.classList.remove('vis','ok','err','warn');void e.offsetWidth;x.textContent=m;e.classList.add('vis');if(t==='ok')e.classList.add('ok');else if(t==='err')e.classList.add('err');else e.classList.add('warn');if(tT)clearTimeout(tT);tT=setTimeout(function(){e.classList.remove('vis')},d);}
+
+function getKey(){
+  if(HARDCODED_API_KEY&&HARDCODED_API_KEY.trim())return HARDCODED_API_KEY.trim();
+  if(MEM_KEY)return MEM_KEY;
+  if(STORAGE_OK){try{return (localStorage.getItem(KEY_LS)||'').trim();}catch(e){return '';}}
+  return '';
+}
+function saveKey(){
+  var i=document.getElementById('ak');if(!i)return;
+  var k=(i.value||'').trim();
+  if(!k){MEM_KEY='';if(STORAGE_OK){try{localStorage.removeItem(KEY_LS);}catch(e){}}updApi();toast('Clé supprimée','warn');return;}
+  if(k.length<10){toast('Clé trop courte','err');return;}
+  MEM_KEY=k;
+  var saved=false;
+  if(STORAGE_OK){try{localStorage.setItem(KEY_LS,k);saved=true;}catch(e){}}
+  if(saved){toast('Clé enregistrée ✓','ok');}
+  else{toast('Clé active (session)','warn',4000);}
+  updApi();
+  i.blur();
+}
+function updApi(){
+  var p=document.getElementById('ap'),i=document.getElementById('ak'),b=document.getElementById('as'),s=document.getElementById('ast'),t=document.getElementById('astx');
+  if(!p||!i||!s||!t)return;
+  p.classList.remove('ok','err','hard');s.classList.remove('ok','err','hard');
+  if(HARDCODED_API_KEY&&HARDCODED_API_KEY.trim()){
+    p.classList.add('hard');s.classList.add('hard');
+    var k=HARDCODED_API_KEY.trim();
+    t.textContent='🔑 Clé intégrée : '+k.slice(0,8)+'…'+k.slice(-4);
+    i.style.display='none';b.style.display='none';
+    updBtn();return;
+  }
+  i.style.display='';b.style.display='';
+  var key=getKey();
+  if(key){
+    p.classList.add('ok');s.classList.add('ok');
+    t.textContent='✅ Clé active · '+key.slice(0,8)+'…'+key.slice(-4)+(STORAGE_OK?'':' (session)');
+  }else{
+    t.textContent='Aucune clé API enregistrée'+(STORAGE_OK?'':' — localStorage bloqué');
+    if(!STORAGE_OK){p.classList.add('err');s.classList.add('err');}
+  }
+  updBtn();
+}
+function updBtn(){
+  var b=document.getElementById('gb');if(!b)return;
+  var hk=!!getKey(),hi=state.imgs.length>0;
+  b.disabled=!hk||!hi||state.running||state.loading;
+  if(state.loading)b.textContent='Chargement…';
+  else if(state.running)b.textContent='Création… ('+(state.done+state.fail)+'/'+state.queue.length+')';
+  else if(!hk)b.textContent='Ajoutez votre clé API';
+  else if(!hi)b.textContent='Ajoutez des images';
+  else b.textContent='Créer '+state.imgs.length+' vidéo'+(state.imgs.length>1?'s':'');
+}
+
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+function setSt(t){var b=document.getElementById('sbar'),x=document.getElementById('stx');if(!b||!x)return;if(t){b.classList.add('vis');x.textContent=t;}else b.classList.remove('vis');}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+function fileUri(f){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(e){res(e.target.result);};r.onerror=function(){rej(new Error('err'));};r.readAsDataURL(f);});}
+function thumb(u){return new Promise(function(res){var i=new Image();i.onload=function(){try{var c=document.createElement('canvas'),ra=i.height/i.width;c.width=THW;c.height=Math.round(THW*ra);var x=c.getContext('2d');x.drawImage(i,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.7));}catch(e){res(u);}};i.onerror=function(){res(u);};i.src=u;});}
+async function procF(f){if(!f.type||f.type.indexOf('image/')!==0)return null;if(f.size>MAXSZ)return null;try{var u=await fileUri(f);var t=await thumb(u);return{u:u,t:t,id:Date.now()+Math.random()};}catch(e){return null;}}
+async function addFiles(fs){var arr=Array.from(fs).filter(function(f){return f.type&&f.type.indexOf('image/')===0;});if(!arr.length)return;state.loading=true;updBtn();for(var i=0;i<arr.length;i+=5){var batch=arr.slice(i,i+5);var rs=await Promise.all(batch.map(procF));for(var j=0;j<rs.length;j++){if(rs[j])state.imgs.push(rs[j]);}renderImgs();}state.loading=false;updBtn();}
+function rmImg(id){state.imgs=state.imgs.filter(function(x){return x.id!==id;});renderImgs();updBtn();}
+function renderImgs(){var g=document.getElementById('ig');if(!g)return;var h='';for(var i=0;i<state.imgs.length;i++){h+='<div class="card"><img src="'+state.imgs[i].t+'" loading="lazy"><button class="rm" data-r="'+state.imgs[i].id+'">✕</button></div>';}g.innerHTML=h;var bs=g.querySelectorAll('[data-r]');for(var k=0;k<bs.length;k++){bs[k].onclick=function(e){e.stopPropagation();rmImg(parseFloat(this.dataset.r));};}}
+
+var PRESETS=[
+{l:'Luxe',t:'Montre ce produit comme un objet de luxe. Lumière douce, reflets précieux, mouvement lent et élégant.'},
+{l:'E-commerce',t:'Anime ce produit pour une fiche e-commerce. Rotation légère, reflet lumineux, fond neutre.'},
+{l:'Tech',t:'Présente ce produit tech avec un mouvement moderne. Éclairage LED bleuté, reflets métalliques.'},
+{l:'Beauté',t:'Mets en valeur ce produit beauté. Lumière douce et diffuse, reflets nacrés, mouvement lent.'},
+{l:'Food',t:'Rends ce produit alimentaire irrésistible. Vapeur légère, lumière chaude, mouvement appétissant.'},
+{l:'Bijou',t:'Fais briller ce bijou. Éclats de lumière, reflets dorés, rotation lente, fond sombre.'},
+{l:'Sport',t:'Présente ce produit sportif avec énergie. Mouvement dynamique, éclairage puissant.'},
+{l:'Naturel',t:'Mets en valeur ce produit naturel. Lumière du jour douce, mouvement organique, ambiance bio.'}
+];
+var EFFECTS=[
+{id:'studio-luxe',n:'Studio Luxe',e:'💎',d:'Fond noir dramatique',p:'luxury studio packshot, black seamless background, dramatic rim lighting, glossy reflections, high-end product photography look. The product must remain identical.'},
+{id:'fond-blanc',n:'Fond Blanc Pro',e:'⬜',d:'Packshot e-commerce',p:'clean white background e-commerce packshot, soft even lighting, subtle reflection under the product, Amazon-style product photography. Product identical.'},
+{id:'fond-degrade',n:'Fond Dégradé',e:'🌈',d:'Couleur douce',p:'soft gradient background, pastel tones, gentle studio lighting, modern minimal product photography. Product identical.'},
+{id:'nature',n:'Nature',e:'🌿',d:'Feuilles, bois',p:'natural setting with soft leaves and wood surface, warm daylight, organic product presentation, subtle breeze moving foliage. Product identical.'},
+{id:'marbre',n:'Marbre & Or',e:'🏛️',d:'Marbre, accents dorés',p:'white marble surface with subtle gold accents, elegant lighting, luxury cosmetic packshot style. Product identical.'},
+{id:'tech-futur',n:'Tech Futuriste',e:'🤖',d:'LED, métal',p:'futuristic tech product shot, cool blue LED lighting, metallic reflections, sleek modern surface. Product identical.'},
+{id:'food-chaud',n:'Food Appétissant',e:'🍽️',d:'Vapeur, lumière chaude',p:'appetizing food photography, warm golden light, subtle steam rising, rustic wooden table. Product identical.'},
+{id:'bijou-eclat',n:'Éclat Bijou',e:'💍',d:'Reflets précieux',p:'jewelry photography, dark elegant background, brilliant light sparkles, macro detail, precious reflections. Product identical.'},
+{id:'beaute-douce',n:'Beauté Douce',e:'💄',d:'Rose poudré',p:'soft beauty cosmetic photography, pink and cream tones, diffused flattering light, silky textures, elegant feminine mood. Product identical.'},
+{id:'sport-energie',n:'Sport Énergie',e:'⚡',d:'Contraste, mouvement',p:'dynamic sports product photography, high contrast lighting, energetic angle, sense of motion and power. Product identical.'},
+{id:'vintage',n:'Vintage Warm',e:'📷',d:'Teintes chaudes rétro',p:'vintage warm product photography, faded amber tones, subtle film grain, retro mood. Product identical.'},
+{id:'minimal',n:'Minimal Épuré',e:'◻️',d:'Moins, c\'est plus',p:'minimalist product photography, single neutral color background, clean negative space, subtle shadow, less is more aesthetic. Product identical.'}
+];
+
+function renderPresets(){var c=document.getElementById('pp');if(!c)return;var h='';for(var i=0;i<PRESETS.length;i++){h+='<div class="pp" data-p="'+i+'">'+esc(PRESETS[i].l)+'</div>';}c.innerHTML=h;var els=c.querySelectorAll('.pp');for(var j=0;j<els.length;j++){els[j].onclick=function(){var i=parseInt(this.dataset.p,10);var p=PRESETS[i];if(!p)return;var ta=document.getElementById('mp');ta.value=p.t;state.prompt=p.t;ta.focus();toast('Exemple appliqué','ok',1200);};}}
+function renderStyles(){var c=document.getElementById('sg');if(!c)return;var h='<div class="none '+(state.effect===null?'sel':'')+'" data-e="none">'+(state.effect===null?'✓ Aucun effet':'🚫 Aucun effet')+'</div>';for(var i=0;i<EFFECTS.length;i++){var s=EFFECTS[i];h+='<div class="sc '+(state.effect===s.id?'sel':'')+'" data-e="'+s.id+'"><div style="font-size:1.1rem">'+s.e+'</div><div><div style="font-weight:600">'+esc(s.n)+'</div><div style="font-size:.62rem;opacity:.65">'+esc(s.d)+'</div></div></div>';}c.innerHTML=h;var els=c.querySelectorAll('[data-e]');for(var j=0;j<els.length;j++){els[j].onclick=function(){var v=this.dataset.e;state.effect=(v==='none')?null:v;renderStyles();};}}
+
+var ACTIONS=['the product rotates slowly, revealing all its sides with elegant precision','a soft light sweeps across the product surface, revealing texture and shine','the product floats gently in the air, defying gravity in a luxurious way','the camera glides around the product in a slow orbital motion','light particles float around the product, adding magical shimmer','the product rests still while reflections dance on its surface'];
+var CAMS=['slow dolly-in, camera gliding forward almost imperceptibly','static locked-off frame, product moves within fixed borders','slow 360 degree orbit around the product','subtle parallax movement revealing depth','high angle looking down at the product hero shot','low angle looking up, product appears grand and powerful','rack focus from background to product'];
+var LIGHTS=['soft diffused studio light','warm golden hour backlight','dramatic side lighting with deep shadows','gentle ambient glow, almost shadowless','cool modern LED lighting','cinematic rim lighting emphasizing the silhouette'];
+var INTENS={subtle:'very subtle movement, barely perceptible change, minimal animation, gentle and quiet',moderate:'moderate movement, clear but controlled motion, balanced energy',strong:'strong dynamic movement, energetic motion, pronounced physical action'};
+function buildPrompt(){var e=state.effect?EFFECTS.filter(function(s){return s.id===state.effect;})[0]:null;var p=[];p.push('Animate this exact image as the starting frame. The product must remain IDENTICAL: same shape, same colors, same logo, same label, same identity. Preserve composition and framing. Only subtle motion, light and atmosphere are animated.');if(e)p.push(e.p);if(state.prompt&&state.prompt.trim())p.push('Artistic direction: '+state.prompt.trim());p.push(INTENS[state.intensity]||INTENS.subtle);p.push(pick(ACTIONS));p.push(pick(CAMS));p.push(pick(LIGHTS));p.push('Sound design: minimal, no music, no dialogue');p.push('Square 1:1 aspect ratio, 24fps, no text, no watermark, consistent product design');return p.join('. ');}
+
+async function apiF(u,o){for(var a=0;a<7;a++){if(state.stop)throw new Error('Arrêt');try{var r=await fetch(u,o);if(r.status===429){var w=[15,30,45,60,90,120,180][Math.min(a,6)];setSt('L IA se prépare… ('+w+'s)');await sleep(w*1000);continue;}if(r.status===503){var w2=[5,10,15,20,30,45][Math.min(a,5)];setSt('Préparation… ('+w2+'s)');await sleep(w2*1000);continue;}return r;}catch(e){if(e.message==='Arrêt')throw e;var w3=[3,5,8,12,20,30][Math.min(a,5)];setSt('Connexion… ('+w3+'s)');await sleep(w3*1000);}}return fetch(u,o);}
+async function createTask(u,p){var r=await apiF(API+'/videos',{method:'POST',headers:{'Authorization':'Bearer '+getKey(),'Content-Type':'application/json'},body:JSON.stringify({model:MODEL,prompt:p,image:u,num_frames:state.frames,frame_rate:FPS})});if(!r.ok){var t=await r.text();throw new Error('HTTP '+r.status+' — '+t.slice(0,150));}var d=await r.json();var id=d.video_id||d.id||d.task_id;if(!id)throw new Error('Pas de video_id');return id;}
+async function pollV(id,cb){var rem=30;while(rem>0){if(state.stop)throw new Error('Arrêt');cb('Préparation… '+rem+'s');await sleep(1000);rem--;}for(var a=0;a<MAX_POLL;a++){if(state.stop)throw new Error('Arrêt');if(a>0){var r=POLL_S;while(r>0){if(state.stop)throw new Error('Arrêt');cb('En cours… '+r+'s');await sleep(1000);r--;}}var u=POLL+'?video_id='+encodeURIComponent(id)+'&model_name='+encodeURIComponent(MODEL);var res=await apiF(u,{method:'GET',headers:{'Authorization':'Bearer '+getKey()}});var d=await res.json();var s=d.status||'unknown';cb('Création… '+(d.progress||0)+'%');if(s==='completed'||s==='succeeded'||s==='done'){var v=(d.metadata&&d.metadata.url)||d.url||(d.output&&d.output.url);if(!v)throw new Error('Pas d URL');return v;}if(s==='failed'||s==='error'||s==='cancelled')throw new Error('Échec');}throw new Error('Timeout');}
+
+function renderQ(){var q=document.getElementById('q');if(!q)return;if(!state.queue.length){q.innerHTML='';return;}var tot=state.queue.length,dn=state.done+state.fail;var h='<div class="qs"><span style="font-weight:700">Progression : '+dn+'/'+tot+'</span><span style="color:#64748b">'+(dn<tot?'En cours':'Terminé')+'</span></div>';for(var i=0;i<state.queue.length&&i<MAXQ;i++){var it=state.queue[i];var ic='○',s='En attente',c='pending';if(it.st==='creating'){ic='◐';s='Préparation…';c='creating';}else if(it.st==='processing'){ic='◐';s=it.pr||'En cours';c='processing';}else if(it.st==='done'){ic='●';s='Terminé';c='done';}else if(it.st==='failed'){ic='✕';s='Échec';c='failed';}h+='<div class="qi '+c+'"><div style="width:1.5rem;text-align:center">'+ic+'</div><div style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Produit '+(it.i+1)+'</div><div style="font-size:.72rem;color:#64748b">'+esc(s)+'</div></div>';}q.innerHTML=h;}
+
+function addGal(u,l){var g=document.getElementById('gal'),gg=document.getElementById('gg');g.style.display='block';var el=document.createElement('div');el.className='gi';el.innerHTML='<video controls preload="metadata" muted playsinline><source src="'+u+'" type="video/mp4"></video><div class="gc"><span>'+esc(l)+'</span><button class="gd" data-u="'+u+'" data-n="'+esc(l)+'">MP4</button></div>';gg.appendChild(el);el.querySelector('.gd').onclick=async function(e){var url=this.dataset.u,nm=this.dataset.n;try{var r=await fetch(url);var b=await r.blob();var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='packshot-'+nm.replace(/[^a-z0-9]/gi,'_')+'.mp4';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);}catch(err){window.open(url,'_blank');}};}
+
+async function taskOnly(item){item.st='creating';item.pr='Préparation…';renderQ();var p=buildPrompt();item.p=p;var id=await createTask(item.img.u,p);item.vid=id;item.t0=Date.now();item.st='processing';item.pr='En cours…';renderQ();return id;}
+async function pollAndShow(item){try{var u=await pollV(item.vid,function(x){item.pr=x;renderQ();});item.st='done';item.url=u;item.pr='Terminé';state.done++;renderQ();updBtn();addGal(u,'Produit '+(item.i+1));}catch(e){item.st='failed';item.pr=e.message==='Arrêt'?'Arrêté':'Échec';if(e.message!=='Arrêt')state.fail++;renderQ();updBtn();}}
+async function startGen(){if(state.running||!state.imgs.length)return;if(!getKey()){toast('Ajoutez votre clé API','err');return;}state.prompt=document.getElementById('mp').value.trim();state.running=true;state.stop=false;state.done=0;state.fail=0;state.queue=state.imgs.map(function(im,i){return{i:i,img:im,st:'pending',pr:null,vid:null,url:null,p:null,t0:null};});document.getElementById('gg').innerHTML='';document.getElementById('gal').style.display='none';document.getElementById('sb').classList.add('vis');document.getElementById('gb').disabled=true;renderQ();updBtn();var tasks=[];try{for(var i=0;i<state.queue.length;i++){if(state.stop)break;var item=state.queue[i];try{await taskOnly(item);tasks.push(pollAndShow(item));}catch(e){if(e.message==='Arrêt')break;item.st='failed';item.pr='Échec';state.fail++;renderQ();updBtn();}if(i<state.queue.length-1&&!state.stop){var w=62;for(var r=w;r>0;r--){if(state.stop)break;setSt('Respiration… Produit '+(i+2)+'/'+state.queue.length+' dans '+r+'s');await sleep(1000);}}}if(tasks.length){setSt('Finalisation…');await Promise.allSettled(tasks);}}catch(e){}setSt(state.stop?'Arrêté':'✦ '+state.done+'/'+state.queue.length+' vidéos ✦');await sleep(4000);setSt(null);state.running=false;state.stop=false;document.getElementById('sb').classList.remove('vis');updBtn();toast(state.done+' vidéo'+(state.done>1?'s':'')+' créée'+(state.done>1?'s':''),'ok');}
+function stopGen(){if(!state.running)return;state.stop=true;setSt('Arrêt…');}
+
+(function(){
+  var as=document.getElementById('as');
+  if(as)as.addEventListener('click',saveKey);
+  var ak=document.getElementById('ak');
+  if(ak)ak.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();saveKey();}});
+  var sb=document.getElementById('sb');
+  if(sb)sb.addEventListener('click',stopGen);
+  var uz=document.getElementById('uz'),fi=document.getElementById('fi');
+  if(uz&&fi){uz.addEventListener('click',function(){fi.click();});fi.addEventListener('change',function(e){addFiles(e.target.files);fi.value='';});}
+  var mp=document.getElementById('mp');
+  if(mp)mp.addEventListener('input',function(e){state.prompt=e.target.value;});
+  var ds=document.getElementById('ds');
+  if(ds)ds.addEventListener('change',function(e){state.frames=parseInt(e.target.value,10);});
+  var is=document.getElementById('is');
+  if(is)is.addEventListener('change',function(e){state.intensity=e.target.value;});
+  var gb=document.getElementById('gb');
+  if(gb)gb.addEventListener('click',startGen);
+  updApi();renderPresets();renderStyles();renderImgs();renderQ();
+})();
+</script>
+</body>
+</html>
