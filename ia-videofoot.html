@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Football — Buts & Célébrations</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,Arial,sans-serif;background:#0a1408;color:#e8ffe8;padding:1.2rem 1rem 5rem;font-size:15px;max-width:760px;margin:0 auto}
+h1{font-size:1.3rem;text-align:center;margin-bottom:.2rem;color:#fff;letter-spacing:.02em}
+.sub{font-size:.78rem;color:#7fa87f;text-align:center;font-style:italic;margin-bottom:1rem}
+.info{background:#0f2010;border-left:3px solid #22c55e;padding:.7rem .9rem;border-radius:8px;font-size:.78rem;margin-bottom:1rem;color:#bbf7d0}
+.panel{background:#0f1a0f;border:1px solid #1e301e;border-radius:12px;padding:1rem;margin-bottom:1rem}
+.panel.ok{border-color:#059669}.panel.err{border-color:#dc2626}.panel.hard{border-color:#22c55e;background:#0f200f}
+input,textarea,select{width:100%;padding:.7rem .85rem;border-radius:8px;border:1px solid #2a4a2a;background:#071007;color:#fff;font-family:inherit;font-size:.88rem;margin-bottom:.5rem}
+textarea{min-height:70px;resize:vertical}
+button{cursor:pointer;font-family:inherit}
+.btn{width:100%;padding:.85rem;border-radius:8px;border:none;background:#22c55e;color:#000;font-size:.9rem;font-weight:700;margin-bottom:.5rem;letter-spacing:.02em}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btn-stop{background:transparent;border:1px solid #dc2626;color:#dc2626;display:none}.btn-stop.vis{display:block}
+.status{font-size:.75rem;padding:.55rem .85rem;border-radius:6px;background:#0f1a0f;color:#7fa87f;display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;word-break:break-all}
+.status.ok{background:#0a2a1a;color:#4ade80;font-weight:600}
+.status.err{background:#2a0a0a;color:#f87171;font-weight:600}
+.status.hard{background:#0f200f;color:#22c55e;font-weight:600}
+.dot{width:8px;height:8px;border-radius:50%;background:#555;flex-shrink:0}
+.status.ok .dot{background:#4ade80}.status.err .dot{background:#f87171}.status.hard .dot{background:#22c55e}
+.upload{border:2px dashed #2a4a2a;border-radius:12px;padding:1.5rem 1rem;text-align:center;cursor:pointer;background:#0f1a0f;margin-bottom:1rem}
+.upload input{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:.5rem;margin-bottom:1rem}
+.card{position:relative;border-radius:8px;overflow:hidden;border:1px solid #1e301e;aspect-ratio:9/16;background:#000}
+.card img{width:100%;height:100%;object-fit:cover;display:block}
+.rm{position:absolute;top:3px;right:3px;background:rgba(34,197,94,.9);color:#000;border:none;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:700}
+.styles{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.4rem}
+.sc{padding:.6rem .7rem;border-radius:8px;border:1px solid #2a4a2a;background:#0f1a0f;color:#ccc;cursor:pointer;display:flex;align-items:center;gap:.4rem;font-size:.78rem}
+.sc.sel{background:#22c55e;color:#000;border-color:#22c55e}
+.none{grid-column:1/-1;padding:.7rem;border-radius:8px;border:2px dashed #2a4a2a;text-align:center;font-size:.8rem;color:#7fa87f;cursor:pointer;margin-bottom:.4rem}
+.none.sel{border-color:#22c55e;border-style:solid;background:#0f200f;color:#22c55e;font-weight:600}
+.presets{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.5rem}
+.pp{padding:.3rem .6rem;border-radius:14px;border:1px solid #2a4a2a;background:#0f1a0f;color:#ccc;font-size:.7rem;cursor:pointer}
+.qs{background:#0f1a0f;border:1px solid #1e301e;border-radius:10px;padding:.6rem .8rem;margin-bottom:.4rem;font-size:.78rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.4rem;color:#ccc}
+.qi{display:flex;align-items:center;gap:.6rem;padding:.6rem .7rem;border-radius:8px;border:1px solid #1e301e;margin-bottom:.3rem;background:#0f1a0f;font-size:.8rem;color:#ccc}
+.qi.pending{opacity:.5}.qi.creating{border-color:#d97706}.qi.processing{border-color:#22c55e}.qi.done{border-color:#059669}.qi.failed{border-color:#dc2626}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.7rem;margin-top:1rem}
+.gi{border-radius:12px;overflow:hidden;border:1px solid #1e301e;background:#000}
+.gi video{width:100%;display:block;aspect-ratio:9/16;object-fit:cover}
+.gc{padding:.5rem .6rem;background:#0f1a0f;font-size:.7rem;color:#888;display:flex;justify-content:space-between;align-items:center}
+.gd{background:#22c55e;color:#000;border:none;padding:.2rem .5rem;border-radius:5px;font-size:.62rem;font-weight:700}
+.sbar{position:fixed;bottom:0;left:0;right:0;background:#22c55e;color:#000;padding:.7rem 1rem;font-size:.8rem;font-weight:700;display:flex;align-items:center;gap:.6rem;transform:translateY(100%);transition:transform .3s;z-index:100}
+.sbar.vis{transform:translateY(0)}
+.sp{width:12px;height:12px;border:2px solid rgba(0,0,0,.2);border-top-color:#000;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;top:1rem;left:50%;transform:translateX(-50%) translateY(-100px);background:#22c55e;color:#000;padding:.75rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:700;z-index:1000;opacity:0;transition:all .3s;max-width:90vw;text-align:center}
+.toast.vis{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.ok{background:#059669;color:#fff}.toast.err{background:#dc2626;color:#fff}.toast.warn{background:#d97706;color:#000}
+label{display:block;font-size:.7rem;color:#7fa87f;text-transform:uppercase;font-weight:700;margin-bottom:.3rem;margin-top:.6rem}
+.clock{font-family:ui-monospace,Menlo,monospace;font-size:1.4rem;font-weight:700;color:#22c55e;text-align:center;padding:.6rem;background:#0a1a0a;border-radius:8px;border:1px solid #1e301e;margin-bottom:.5rem;letter-spacing:.05em}
+.clock small{display:block;font-size:.65rem;color:#7fa87f;font-weight:500;letter-spacing:0;margin-top:.2rem}
+#nc,#nv{position:fixed;top:0;left:0;width:1px;height:1px;opacity:.01;pointer-events:none;z-index:-1}
+</style>
+</head>
+<body>
+<h1>Football</h1>
+<p class="sub">Buts, célébrations, ambiance stade</p>
+<div class="info"><strong>Mode football :</strong> chaque image devient une scène de match. Buts, arrêts, célébrations, ambiance tribune. Format 9:16.<br><strong>Vidéo longue :</strong> assemble plusieurs segments pour créer une vidéo jusqu'à 3 minutes, avec compteur en temps réel.</div>
+
+<div class="panel" id="ap">
+<input type="password" id="ak" placeholder="Collez votre clé API (sk-...)" autocomplete="off">
+<button class="btn" id="as" type="button">Enregistrer la clé</button>
+<div class="status" id="ast"><span class="dot"></span><span id="astx">Aucune clé API enregistrée</span></div>
+<div style="font-size:.7rem;color:#7fa87f;margin-top:.4rem">Clé sur <a href="https://platform.agnes-ai.com" target="_blank" style="color:#22c55e">platform.agnes-ai.com</a></div>
+</div>
+
+<div class="upload" id="uz"><input type="file" id="fi" accept="image/*" multiple><div style="font-size:2rem;opacity:.5;margin-bottom:.4rem">＋</div><div style="font-weight:600">Ajoutez vos images</div><div style="font-size:.75rem;color:#7fa87f">Chaque image devient une scène de match</div></div>
+<div class="grid" id="ig"></div>
+
+<div class="panel">
+<div style="font-size:.75rem;font-weight:700;text-transform:uppercase;color:#7fa87f;margin-bottom:.5rem">Votre scénario</div>
+<div class="presets" id="pp"></div>
+<textarea id="mp" placeholder="Décrivez la scène : but, célébration, arrêt décisif..."></textarea>
+</div>
+
+<div class="panel">
+<div style="font-size:.75rem;font-weight:700;text-transform:uppercase;color:#7fa87f;margin-bottom:.5rem">Style football</div>
+<div class="styles" id="sg"></div>
+</div>
+
+<div class="panel">
+<div style="font-size:.75rem;font-weight:700;text-transform:uppercase;color:#7fa87f;margin-bottom:.5rem">Réglages</div>
+<label>Durée cible de la vidéo finale</label>
+<select id="ds">
+<option value="10">10 secondes (1 segment)</option>
+<option value="20">20 secondes (2 segments)</option>
+<option value="30">30 secondes (3 segments)</option>
+<option value="45">45 secondes (4 segments)</option>
+<option value="60" selected>1 minute (5 segments)</option>
+<option value="90">1 min 30 (7 segments)</option>
+<option value="120">2 minutes (10 segments)</option>
+<option value="180">3 minutes (15 segments)</option>
+</select>
+<label>Intensité</label>
+<select id="is"><option value="subtle">Subtile (tension)</option><option value="moderate" selected>Modérée (match)</option><option value="strong">Forte (action)</option></select>
+</div>
+
+<div class="panel">
+<div class="clock" id="clk">--:--<small>en attente</small></div>
+</div>
+
+<button class="btn" id="gb" type="button" disabled>Créer les vidéos</button>
+<button class="btn btn-stop" id="sb" type="button">Arrêter</button>
+<div id="q"></div>
+<div id="gal" style="display:none"><div style="font-size:.75rem;font-weight:700;text-transform:uppercase;color:#7fa87f;margin:1rem 0 .6rem">Vidéos générées</div><div class="gal" id="gg"></div></div>
+
+<div class="sbar" id="sbar"><div class="sp"></div><span id="stx">Préparation…</span></div>
+<div class="toast" id="toast"><span id="ttx">Message</span></div>
+<canvas id="nc" width="2" height="2"></canvas>
+<video id="nv" playsinline muted loop></video>
+
+<script>
+// ============================================================
+// CLE API EN DUR - colle ta clé entre les guillemets si tu veux
+// ============================================================
+var HARDCODED_API_KEY = '';
+
+var API='https://apihub.agnes-ai.com/v1';
+var POLL='https://apihub.agnes-ai.com/agnesapi';
+var MODEL='agnes-video-v2.0';
+var FPS=24;
+var POLL_S=8,MAX_POLL=120;
+var KEY_LS='agnes_key_foot_v1';
+var MAXSZ=12*1024*1024,THW=200,MAXQ=50;
+
+var MEM_KEY='';
+var STORAGE_OK=true;
+try{localStorage.setItem('__t','1');localStorage.removeItem('__t');}catch(e){STORAGE_OK=false;}
+
+var state={
+  imgs:[], running:false, stop:false, queue:[], done:0, fail:0,
+  effect:null, prompt:'', intensity:'moderate',
+  targetSeconds:60, loading:false,
+  clockStart:0, clockEnd:0, clockTimer:null
+};
+
+var tT=null;
+function toast(m,t,d){t=t||'ok';d=d||2500;var e=document.getElementById('toast'),x=document.getElementById('ttx');if(!e)return;e.classList.remove('vis','ok','err','warn');void e.offsetWidth;x.textContent=m;e.classList.add('vis');if(t==='ok')e.classList.add('ok');else if(t==='err')e.classList.add('err');else e.classList.add('warn');if(tT)clearTimeout(tT);tT=setTimeout(function(){e.classList.remove('vis')},d);}
+
+// ------- Compteur
+function clockReset(){if(state.clockTimer){clearInterval(state.clockTimer);state.clockTimer=null;}var c=document.getElementById('clk');if(c)c.innerHTML='--:--<small>en attente</small>';}
+function clockStart(totalSec){state.clockStart=Date.now();state.clockEnd=state.clockStart+totalSec*1000;if(state.clockTimer)clearInterval(state.clockTimer);state.clockTimer=setInterval(tickClock,500);tickClock();}
+function clockSet(totalSec){state.clockEnd=Date.now()+totalSec*1000;}
+function tickClock(){var c=document.getElementById('clk');if(!c)return;var rem=Math.max(0,Math.floor((state.clockEnd-Date.now())/1000));var m=Math.floor(rem/60);var s=rem%60;var line=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');var label=state.running?'temps restant estimé':'terminé';if(!state.running&&rem<=0)label='terminé';c.innerHTML=line+'<small>'+label+'</small>';}
+
+function getKey(){
+  if(HARDCODED_API_KEY&&HARDCODED_API_KEY.trim())return HARDCODED_API_KEY.trim();
+  if(MEM_KEY)return MEM_KEY;
+  if(STORAGE_OK){try{return (localStorage.getItem(KEY_LS)||'').trim();}catch(e){return '';}}
+  return '';
+}
+function saveKey(){
+  var i=document.getElementById('ak');if(!i)return;
+  var k=(i.value||'').trim();
+  if(!k){MEM_KEY='';if(STORAGE_OK){try{localStorage.removeItem(KEY_LS);}catch(e){}}updApi();toast('Clé supprimée','warn');return;}
+  if(k.length<10){toast('Clé trop courte','err');return;}
+  MEM_KEY=k;
+  var saved=false;
+  if(STORAGE_OK){try{localStorage.setItem(KEY_LS,k);saved=true;}catch(e){}}
+  if(saved){toast('Clé enregistrée ✓','ok');}
+  else{toast('Clé active (session)','warn',4000);}
+  updApi();
+  i.blur();
+}
+function updApi(){
+  var p=document.getElementById('ap'),i=document.getElementById('ak'),b=document.getElementById('as'),s=document.getElementById('ast'),t=document.getElementById('astx');
+  if(!p||!i||!s||!t)return;
+  p.classList.remove('ok','err','hard');s.classList.remove('ok','err','hard');
+  if(HARDCODED_API_KEY&&HARDCODED_API_KEY.trim()){
+    p.classList.add('hard');s.classList.add('hard');
+    var k=HARDCODED_API_KEY.trim();
+    t.textContent='🔑 Clé intégrée : '+k.slice(0,8)+'…'+k.slice(-4);
+    i.style.display='none';b.style.display='none';
+    updBtn();return;
+  }
+  i.style.display='';b.style.display='';
+  var key=getKey();
+  if(key){
+    p.classList.add('ok');s.classList.add('ok');
+    t.textContent='✅ Clé active · '+key.slice(0,8)+'…'+key.slice(-4)+(STORAGE_OK?'':' (session)');
+  }else{
+    t.textContent='Aucune clé API enregistrée'+(STORAGE_OK?'':' — localStorage bloqué');
+    if(!STORAGE_OK){p.classList.add('err');s.classList.add('err');}
+  }
+  updBtn();
+}
+function updBtn(){
+  var b=document.getElementById('gb');if(!b)return;
+  var hk=!!getKey(),hi=state.imgs.length>0;
+  b.disabled=!hk||!hi||state.running||state.loading;
+  if(state.loading)b.textContent='Chargement…';
+  else if(state.running)b.textContent='Création… ('+(state.done+state.fail)+'/'+state.queue.length+')';
+  else if(!hk)b.textContent='Ajoutez votre clé API';
+  else if(!hi)b.textContent='Ajoutez des images';
+  else b.textContent='Créer '+state.imgs.length+' vidéo'+(state.imgs.length>1?'s':'');
+}
+
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+function setSt(t){var b=document.getElementById('sbar'),x=document.getElementById('stx');if(!b||!x)return;if(t){b.classList.add('vis');x.textContent=t;}else b.classList.remove('vis');}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+function fileUri(f){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(e){res(e.target.result);};r.onerror=function(){rej(new Error('err'));};r.readAsDataURL(f);});}
+function thumb(u){return new Promise(function(res){var i=new Image();i.onload=function(){try{var c=document.createElement('canvas'),ra=i.height/i.width;c.width=THW;c.height=Math.round(THW*ra);var x=c.getContext('2d');x.drawImage(i,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.7));}catch(e){res(u);}};i.onerror=function(){res(u);};i.src=u;});}
+async function procF(f){if(!f.type||f.type.indexOf('image/')!==0)return null;if(f.size>MAXSZ)return null;try{var u=await fileUri(f);var t=await thumb(u);return{u:u,t:t,id:Date.now()+Math.random()};}catch(e){return null;}}
+async function addFiles(fs){var arr=Array.from(fs).filter(function(f){return f.type&&f.type.indexOf('image/')===0;});if(!arr.length)return;state.loading=true;updBtn();for(var i=0;i<arr.length;i+=5){var batch=arr.slice(i,i+5);var rs=await Promise.all(batch.map(procF));for(var j=0;j<rs.length;j++){if(rs[j])state.imgs.push(rs[j]);}renderImgs();}state.loading=false;updBtn();}
+function rmImg(id){state.imgs=state.imgs.filter(function(x){return x.id!==id;});renderImgs();updBtn();}
+function renderImgs(){var g=document.getElementById('ig');if(!g)return;var h='';for(var i=0;i<state.imgs.length;i++){h+='<div class="card"><img src="'+state.imgs[i].t+'" loading="lazy"><button class="rm" data-r="'+state.imgs[i].id+'">✕</button></div>';}g.innerHTML=h;var bs=g.querySelectorAll('[data-r]');for(var k=0;k<bs.length;k++){bs[k].onclick=function(e){e.stopPropagation();rmImg(parseFloat(this.dataset.r));};}}
+
+var PRESETS=[
+{l:'But',t:'Le joueur frappe, la balle file au fond des filets. Ralenti, filet qui tremble, foule qui explose, ambiance stade électrique.'},
+{l:'Célébration',t:'Célébration de but. Le joueur glisse sur les genoux, bras écartés, coéquipiers qui arrivent, tribunes en délire, confettis.'},
+{l:'Arrêt décisif',t:'Le gardien plonge et capte le ballon en pleine lucarne. Ralenti, tension, sueur, regard déterminé, gazon au sol.'},
+{l:'Avant-match',t:'Vestiaire avant le match. Silence, regard dans le miroir, maillot enfilé, bandes de capitaine, échauffement, applaudissements lointains.'},
+{l:'Tir au but',t:'Le joueur arme sa frappe aux 30 mètres. Silence, tout le stade retient son souffle, contact, ballon qui part, filet.'},
+{l:'Corner',t:'Corner en fin de match. Tout le monde monte, gardien qui s\'agite, ballon qui tourne dans les airs, mêlée dans la surface.'},
+{l:'Penalty',t:'Penalty décisif. Le tireur pose la balle, respire, fixe le gardien, la foule retient son souffle, coup de sifflet.'},
+{l:'Stade',t:'Ambiance d\'un grand stade. Tifos, drapeaux, chants, projecteurs, terrain vert impeccable, foule immense.'},
+{l:'Vestiaire',t:'Vestiaire d\'après-match. Maillots au sol, crampons retirés, silence, fierté ou défaite, ambiance brute.'},
+{l:'Trophée',t:'Lever du trophée. Confettis, flashs, sourire, coupe qui brille, équipe en cercle, hystérie collective.'}
+];
+var EFFECTS=[
+{id:'premier-league',n:'Premier League',e:'🏴',d:'Nuit anglaise',p:'Premier League night match aesthetic, packed English stadium, floodlights, rain on camera lens, green pitch vivid, blue and red kit colors, epic atmosphere. Preserve the exact subject identity.'},
+{id:'ligue-champions',n:'Ligue des Champions',e:'🏆',d:'Hymne, soirée',p:'UEFA Champions League night atmosphere, starry ball, iconic anthem vibe, pristine pitch, camera flashes in the crowd, elite competition feel. Preserve the exact subject identity.'},
+{id:'coupe-monde',n:'Coupe du Monde',e:'🌍',d:'Nations, foule',p:'FIFA World Cup atmosphere, international flags, colorful fans, summer night, iconic celebration, global elite stage. Preserve the exact subject identity.'},
+{id:'psg',n:'PSG',e:'🔵',d:'Parc des Princes',p:'Paris Saint-Germain aesthetic, blue and red, Parc des Princes under lights, modern elite football, French flair. Preserve the exact subject identity.'},
+{id:'barca',n:'FC Barcelone',e:'🔴',d:'Camp Nou',p:'FC Barcelona aesthetic, blaugrana blue and red, Camp Nou atmosphere, tiki-taka elegance, Catalan flair. Preserve the exact subject identity.'},
+{id:'real',n:'Real Madrid',e:'⚪',d:'Bernabéu',p:'Real Madrid aesthetic, white kit, Santiago Bernabéu, royal European nights, dominant elite aura. Preserve the exact subject identity.'},
+{id:'om',n:'Marseille',e:'⚪',d:'Vélodrome',p:'Olympique de Marseille aesthetic, Vélodrome cauldron, white and sky blue, southern passion, intense supporters. Preserve the exact subject identity.'},
+{id:'serie-a',n:'Serie A',e:'🇮🇹',d:'Italie tactique',p:'Serie A Italian football aesthetic, tactical masterclass, passionate curva, historic stadium, warm Mediterranean evening. Preserve the exact subject identity.'},
+{id:'brasil',n:'Brésil',e:'🇧🇷',d:'Joga bonito',p:'Brazilian football aesthetic, joga bonito, samba rhythm, yellow and green, beach futsal vibe, joyful energy. Preserve the exact subject identity.'},
+{id:'street',n:'Street Football',e:'⚽',d:'Cage, bitume',p:'street football aesthetic, cage urbaine, bitume, paniers grillagés, sweat, adrénaline brute, milieu populaire. Preserve the exact subject identity.'},
+{id:'training',n:'Entraînement',e:'🎯',d:'Séance pro',p:'professional training session aesthetic, drills, cones, focused intensity, sweat, morning light, elite preparation. Preserve the exact subject identity.'},
+{id:'retro-90',n:'Rétro 90s',e:'📼',d:'VHS, folklore',p:'1990s football aesthetic, VHS grain, old stadium, baggy kits, memorable goals era, iconic celebration vibe. Preserve the exact subject identity.'}
+];
+
+function renderPresets(){var c=document.getElementById('pp');if(!c)return;var h='';for(var i=0;i<PRESETS.length;i++){h+='<div class="pp" data-p="'+i+'">'+esc(PRESETS[i].l)+'</div>';}c.innerHTML=h;var els=c.querySelectorAll('.pp');for(var j=0;j<els.length;j++){els[j].onclick=function(){var i=parseInt(this.dataset.p,10);var p=PRESETS[i];if(!p)return;var ta=document.getElementById('mp');ta.value=p.t;state.prompt=p.t;ta.focus();toast('Scénario appliqué','ok',1200);};}}
+function renderStyles(){var c=document.getElementById('sg');if(!c)return;var h='<div class="none '+(state.effect===null?'sel':'')+'" data-e="none">'+(state.effect===null?'✓ Aucun effet':'🚫 Aucun effet')+'</div>';for(var i=0;i<EFFECTS.length;i++){var s=EFFECTS[i];h+='<div class="sc '+(state.effect===s.id?'sel':'')+'" data-e="'+s.id+'"><div style="font-size:1.1rem">'+s.e+'</div><div><div style="font-weight:600">'+esc(s.n)+'</div><div style="font-size:.62rem;opacity:.65">'+esc(s.d)+'</div></div></div>';}c.innerHTML=h;var els=c.querySelectorAll('[data-e]');for(var j=0;j<els.length;j++){els[j].onclick=function(){var v=this.dataset.e;state.effect=(v==='none')?null:v;renderStyles();};}}
+
+var ACTIONS=[
+'the ball strikes the back of the net, slow motion, net ripples outward',
+'the player slides on their knees, arms wide, pure joy',
+'the goalkeeper dives full stretch to push the ball away',
+'the crowd rises as one, arms in the air, chants echoing',
+'the player looks up at the sky, exhausted, breathing heavy',
+'two teammates embrace, foreheads together, sweat and grass',
+'the striker strikes the ball, muscles tense, slow motion contact',
+'the captain lifts the trophy, confetti falling, flashes everywhere',
+'a corner kick curls through the air, players jumping, tension',
+'the player stares down the goalkeeper before the decisive penalty'
+];
+var CAMS=[
+'slow-motion tracking shot following the ball into the net',
+'low angle at ground level as the player slides past the lens',
+'overhead crane shot of the celebrating team circle',
+'handheld follow behind the striker during the run',
+'static locked-off frame of the goal, action unfolding',
+'360 degree orbit around the player during the celebration',
+'rack focus from the crowd to the player',
+'camera pushes through the net fabric'
+];
+var LIGHTS=[
+'floodlights blazing on the pitch at night',
+'golden hour sun low in the sky, long shadows',
+'camera flashes sparkling in the crowd',
+'cool stadium roof lighting with dramatic contrast',
+'warm sunset over the stands',
+'stadium lights through slight rain haze'
+];
+var INTENS={subtle:'very subtle movement, barely perceptible change, restrained emotion',moderate:'moderate action, dynamic movement, controlled football energy',strong:'high-octane action, explosive movement, stadium roar energy'};
+
+function buildPrompt(){
+  var e=state.effect?EFFECTS.filter(function(s){return s.id===state.effect;})[0]:null;
+  var p=[];
+  p.push('Animate this exact image as the starting frame of a football scene. The subjects must remain IDENTICAL: same faces, same kits, same composition, same identity. Preserve framing. Only subtle-to-moderate motion, light, crowd and atmosphere are animated.');
+  if(e)p.push(e.p);
+  if(state.prompt&&state.prompt.trim())p.push('Scenario: '+state.prompt.trim());
+  p.push(INTENS[state.intensity]||INTENS.moderate);
+  p.push(pick(ACTIONS));
+  p.push(pick(CAMS));
+  p.push(pick(LIGHTS));
+  p.push('Cinematic football broadcast aesthetic, epic stadium mood');
+  p.push('Sound design: minimal foley, crowd roar subtle, no music, no dialogue');
+  p.push('9:16 vertical, 24fps, no text, no subtitles, no watermarks');
+  return p.join('. ');
+}
+
+async function apiF(u,o){for(var a=0;a<7;a++){if(state.stop)throw new Error('Arrêt');try{var r=await fetch(u,o);if(r.status===429){var w=[15,30,45,60,90,120,180][Math.min(a,6)];setSt('L IA se prépare… ('+w+'s)');await sleep(w*1000);continue;}if(r.status===503){var w2=[5,10,15,20,30,45][Math.min(a,5)];setSt('Préparation… ('+w2+'s)');await sleep(w2*1000);continue;}return r;}catch(e){if(e.message==='Arrêt')throw e;var w3=[3,5,8,12,20,30][Math.min(a,5)];setSt('Connexion… ('+w3+'s)');await sleep(w3*1000);}}return fetch(u,o);}
+async function createTask(u,p,frames){var r=await apiF(API+'/videos',{method:'POST',headers:{'Authorization':'Bearer '+getKey(),'Content-Type':'application/json'},body:JSON.stringify({model:MODEL,prompt:p,image:u,num_frames:frames,frame_rate:FPS})});if(!r.ok){var t=await r.text();throw new Error('HTTP '+r.status+' — '+t.slice(0,150));}var d=await r.json();var id=d.video_id||d.id||d.task_id;if(!id)throw new Error('Pas de video_id');return id;}
+async function pollV(id,cb){var rem=30;while(rem>0){if(state.stop)throw new Error('Arrêt');cb('Préparation… '+rem+'s');await sleep(1000);rem--;}for(var a=0;a<MAX_POLL;a++){if(state.stop)throw new Error('Arrêt');if(a>0){var r=POLL_S;while(r>0){if(state.stop)throw new Error('Arrêt');cb('En cours… '+r+'s');await sleep(1000);r--;}}var u=POLL+'?video_id='+encodeURIComponent(id)+'&model_name='+encodeURIComponent(MODEL);var res=await apiF(u,{method:'GET',headers:{'Authorization':'Bearer '+getKey()}});var d=await res.json();var s=d.status||'unknown';cb('Création… '+(d.progress||0)+'%');if(s==='completed'||s==='succeeded'||s==='done'){var v=(d.metadata&&d.metadata.url)||d.url||(d.output&&d.output.url);if(!v)throw new Error('Pas d URL');return v;}if(s==='failed'||s==='error'||s==='cancelled')throw new Error('Échec');}throw new Error('Timeout');}
+
+function renderQ(){var q=document.getElementById('q');if(!q)return;if(!state.queue.length){q.innerHTML='';return;}var tot=state.queue.length,dn=state.done+state.fail;var h='<div class="qs"><span style="font-weight:700">Progression : '+dn+'/'+tot+'</span><span style="color:#7fa87f">'+(dn<tot?'En cours':'Terminé')+'</span></div>';for(var i=0;i<state.queue.length&&i<MAXQ;i++){var it=state.queue[i];var ic='○',s='En attente',c='pending';if(it.st==='creating'){ic='◐';s='Préparation…';c='creating';}else if(it.st==='processing'){ic='◐';s=it.pr||'En cours';c='processing';}else if(it.st==='done'){ic='●';s=it.pr||'Terminé';c='done';}else if(it.st==='failed'){ic='✕';s='Échec';c='failed';}h+='<div class="qi '+c+'"><div style="width:1.5rem;text-align:center">'+ic+'</div><div style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Vidéo '+(it.i+1)+'</div><div style="font-size:.72rem;color:#888">'+esc(s)+'</div></div>';}q.innerHTML=h;}
+
+function addGal(u,l,durSec){var g=document.getElementById('gal'),gg=document.getElementById('gg');g.style.display='block';var el=document.createElement('div');el.className='gi';el.innerHTML='<video controls preload="metadata" muted playsinline><source src="'+u+'" type="video/mp4"></video><div class="gc"><span>'+esc(l)+(durSec?' · '+Math.round(durSec)+'s':'')+'</span><button class="gd" data-u="'+u+'" data-n="'+esc(l)+'">MP4</button></div>';gg.appendChild(el);el.querySelector('.gd').onclick=async function(e){var url=this.dataset.u,nm=this.dataset.n;try{var r=await fetch(url);var b=await r.blob();var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='foot-'+nm.replace(/[^a-z0-9]/gi,'_')+'.mp4';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);}catch(err){window.open(url,'_blank');}};}
+
+// ------- Assemblage multi-segments en une vidéo (MediaRecorder)
+// Récupère plusieurs URLs vidéo, les joue l'une après l'autre sur un canvas,
+// enregistre le flux canvas + audio via MediaRecorder pour créer un seul blob.
+async function mergeVideos(urls,onProgress){
+  if(urls.length===1)return {blob:null,url:urls[0],duration:0,single:true};
+  // Charger toutes les vidéos
+  var videos=[];
+  for(var i=0;i<urls.length;i++){
+    onProgress('Téléchargement segment '+(i+1)+'/'+urls.length+'…');
+    var v=await loadVideo(urls[i]);
+    videos.push(v);
+  }
+  // Dimensions du canvas = première vidéo
+  var W=videos[0].videoWidth||720;
+  var H=videos[0].videoHeight||1280;
+  var canvas=document.createElement('canvas');
+  canvas.width=W;canvas.height=H;
+  var ctx=canvas.getContext('2d');
+  // Récupérer le flux vidéo
+  var canvasStream=canvas.captureStream(30);
+  // Essayer de récupérer l'audio de la première vidéo (facultatif)
+  var audioStream=null;
+  try{
+    var aud=videos[0].captureStream?videos[0].captureStream():null;
+    if(aud){var aTracks=aud.getAudioTracks();if(aTracks.length){audioStream=new MediaStream(aTracks);}}
+  }catch(e){}
+  // Fusionner pistes
+  var combined=canvasStream;
+  if(audioStream){audioStream.getAudioTracks().forEach(function(t){combined.addTrack(t);});}
+  // Choisir un codec supporté
+  var mime='video/webm;codecs=vp9';
+  if(!MediaRecorder.isTypeSupported(mime))mime='video/webm;codecs=vp8';
+  if(!MediaRecorder.isTypeSupported(mime))mime='video/webm';
+  var rec=new MediaRecorder(combined,{mimeType:mime,videoBitsPerSecond:4000000});
+  var chunks=[];
+  rec.ondataavailable=function(e){if(e.data&&e.data.size>0)chunks.push(e.data);};
+  var done=new Promise(function(res){rec.onstop=function(){res(new Blob(chunks,{type:mime}));};});
+  rec.start();
+  // Lire chaque vidéo en séquence
+  for(var k=0;k<videos.length;k++){
+    var vd=videos[k];
+    await playVideoOnCanvas(vd,canvas,ctx,onProgress,'Lecture segment '+(k+1)+'/'+videos.length+'…');
+  }
+  rec.stop();
+  var blob=await done;
+  var url=URL.createObjectURL(blob);
+  return {blob:blob,url:url,duration:0,single:false};
+}
+
+function loadVideo(url){
+  return new Promise(function(res,rej){
+    var v=document.createElement('video');
+    v.crossOrigin='anonymous';
+    v.preload='auto';
+    v.muted=true;
+    v.playsInline=true;
+    v.src=url;
+    v.onloadedmetadata=function(){res(v);};
+    v.onerror=function(){rej(new Error('Erreur chargement vidéo'));};
+  });
+}
+
+function playVideoOnCanvas(v,canvas,ctx,onProgress,label){
+  return new Promise(function(res){
+    v.currentTime=0;
+    var stopped=false;
+    function draw(){
+      if(stopped)return;
+      try{ctx.drawImage(v,0,0,canvas.width,canvas.height);}catch(e){}
+      if(!v.paused&&!v.ended)requestAnimationFrame(draw);
+    }
+    v.onended=function(){stopped=true;res();};
+    v.onplay=function(){if(!stopped)requestAnimationFrame(draw);};
+    var p=v.play();
+    if(p&&p.catch)p.catch(function(){res();});
+  });
+}
+
+async function taskOnly(item){
+  item.st='creating';item.pr='Préparation…';renderQ();
+  var segSeconds=item.segSeconds;
+  var frames=Math.min(300,Math.max(121,Math.round(segSeconds*FPS)));
+  var p=buildPrompt();
+  item.p=p;
+  var urls=[];
+  var segments=item.segmentCount;
+  for(var s=0;s<segments;s++){
+    if(state.stop)throw new Error('Arrêt');
+    item.pr='Segment '+(s+1)+'/'+segments+' — création…';
+    renderQ();
+    var id=await createTask(item.img.u,p+(s>0?'. Continue the scene naturally, same subject, same setting, seamless motion continuity.':''),frames);
+    var u=await pollV(id,function(x){item.pr='Segment '+(s+1)+'/'+segments+' — '+x;renderQ();});
+    urls.push(u);
+    if(s<segments-1){
+      // Petite pause respiration entre segments
+      for(var r=6;r>0;r--){
+        if(state.stop)throw new Error('Arrêt');
+        item.pr='Segment '+(s+1)+'/'+segments+' prêt — pause '+r+'s';
+        renderQ();
+        await sleep(1000);
+      }
+    }
+  }
+  item.urls=urls;
+  return urls;
+}
+
+async function pollAndShow(item){
+  try{
+    var urls=item.urls||await taskOnly(item);
+    item.pr='Assemblage…';
+    renderQ();
+    var result=await mergeVideos(urls,function(msg){item.pr=msg;renderQ();});
+    item.st='done';
+    item.url=result.url;
+    item.pr='Terminé';
+    state.done++;
+    renderQ();updBtn();
+    addGal(result.url,'Vidéo '+(item.i+1),item.targetSeconds);
+  }catch(e){
+    item.st='failed';
+    item.pr=e.message==='Arrêt'?'Arrêté':'Échec';
+    if(e.message!=='Arrêt')state.fail++;
+    renderQ();updBtn();
+  }
+}
+
+async function startGen(){
+  if(state.running||!state.imgs.length)return;
+  if(!getKey()){toast('Ajoutez votre clé API','err');return;}
+  state.prompt=document.getElementById('mp').value.trim();
+  state.targetSeconds=parseInt(document.getElementById('ds').value,10);
+  state.running=true;state.stop=false;state.done=0;state.fail=0;
+  var segSeconds=10; // longueur d'un segment Agnes
+  var segmentCount=Math.max(1,Math.ceil(state.targetSeconds/segSeconds));
+  state.queue=state.imgs.map(function(im,i){return{i:i,img:im,st:'pending',pr:null,urls:null,url:null,p:null,targetSeconds:state.targetSeconds,segSeconds:segSeconds,segmentCount:segmentCount};});
+  document.getElementById('gg').innerHTML='';
+  document.getElementById('gal').style.display='none';
+  document.getElementById('sb').classList.add('vis');
+  document.getElementById('gb').disabled=true;
+  renderQ();updBtn();
+  // Compteur : estimation de temps = segments * (creation 20s + attente 40s + assemble 5s) par image
+  var estimatePerImage=segmentCount*(20+45)+8;
+  var estimateTotal=estimatePerImage*state.imgs.length;
+  clockStart(estimateTotal);
+  var tasks=[];
+  try{
+    for(var i=0;i<state.queue.length;i++){
+      if(state.stop)break;
+      var item=state.queue[i];
+      try{
+        var urls=await taskOnly(item);
+        tasks.push(pollAndShow(item));
+      }catch(e){
+        if(e.message==='Arrêt')break;
+        item.st='failed';item.pr='Échec';state.fail++;renderQ();updBtn();
+      }
+      if(i<state.queue.length-1&&!state.stop){
+        var w=62;
+        for(var r=w;r>0;r--){
+          if(state.stop)break;
+          setSt('Respiration… Vidéo '+(i+2)+'/'+state.queue.length+' dans '+r+'s');
+          await sleep(1000);
+        }
+      }
+    }
+    if(tasks.length){setSt('Finalisation…');await Promise.allSettled(tasks);}
+  }catch(e){}
+  state.running=false;state.stop=false;
+  clockSet(0);tickClock();
+  setSt(state.stop?'Arrêté':'✦ '+state.done+'/'+state.queue.length+' vidéos ✦');
+  await sleep(3000);setSt(null);
+  document.getElementById('sb').classList.remove('vis');
+  updBtn();
+  toast(state.done+' vidéo'+(state.done>1?'s':'')+' créée'+(state.done>1?'s':''),'ok');
+}
+function stopGen(){if(!state.running)return;state.stop=true;setSt('Arrêt…');}
+
+(function(){
+  var as=document.getElementById('as');
+  if(as)as.addEventListener('click',saveKey);
+  var ak=document.getElementById('ak');
+  if(ak)ak.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();saveKey();}});
+  var sb=document.getElementById('sb');
+  if(sb)sb.addEventListener('click',stopGen);
+  var uz=document.getElementById('uz'),fi=document.getElementById('fi');
+  if(uz&&fi){uz.addEventListener('click',function(){fi.click();});fi.addEventListener('change',function(e){addFiles(e.target.files);fi.value='';});}
+  var mp=document.getElementById('mp');
+  if(mp)mp.addEventListener('input',function(e){state.prompt=e.target.value;});
+  var is=document.getElementById('is');
+  if(is)is.addEventListener('change',function(e){state.intensity=e.target.value;});
+  var gb=document.getElementById('gb');
+  if(gb)gb.addEventListener('click',startGen);
+  updApi();renderPresets();renderStyles();renderImgs();renderQ();
+})();
+</script>
+</body>
+</html>
