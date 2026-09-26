@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Annonce Entreprise</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,Arial,sans-serif;background:#0a0e1a;color:#e8eaf2;padding:1.2rem 1rem 5rem;font-size:15px;max-width:760px;margin:0 auto}
+h1{font-size:1.3rem;text-align:center;margin-bottom:.2rem;color:#fff;letter-spacing:.02em}
+.sub{font-size:.78rem;color:#7c85a3;text-align:center;font-style:italic;margin-bottom:1rem}
+.info{background:#0f1525;border-left:3px solid #4a6cf7;padding:.7rem .9rem;border-radius:8px;font-size:.78rem;margin-bottom:1rem;color:#c7d2ff}
+.panel{background:#0f1525;border:1px solid #1e2638;border-radius:12px;padding:1rem;margin-bottom:1rem}
+.panel.ok{border-color:#059669}.panel.err{border-color:#dc2626}.panel.hard{border-color:#4a6cf7;background:#101830}
+input,textarea,select{width:100%;padding:.7rem .85rem;border-radius:8px;border:1px solid #2a3350;background:#080b14;color:#fff;font-family:inherit;font-size:.88rem;margin-bottom:.5rem}
+textarea{min-height:70px;resize:vertical}
+button{cursor:pointer;font-family:inherit}
+.btn{width:100%;padding:.85rem;border-radius:8px;border:none;background:#4a6cf7;color:#fff;font-size:.9rem;font-weight:700;margin-bottom:.5rem;letter-spacing:.02em}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btn-stop{background:transparent;border:1px solid #dc2626;color:#dc2626;display:none}.btn-stop.vis{display:block}
+.status{font-size:.75rem;padding:.55rem .85rem;border-radius:6px;background:#0f1525;color:#7c85a3;display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;word-break:break-all}
+.status.ok{background:#0a2a1a;color:#4ade80;font-weight:600}
+.status.err{background:#2a0a0a;color:#f87171;font-weight:600}
+.status.hard{background:#101830;color:#4a6cf7;font-weight:600}
+.dot{width:8px;height:8px;border-radius:50%;background:#555;flex-shrink:0}
+.status.ok .dot{background:#4ade80}.status.err .dot{background:#f87171}.status.hard .dot{background:#4a6cf7}
+.upload{border:2px dashed #2a3350;border-radius:12px;padding:1.5rem 1rem;text-align:center;cursor:pointer;background:#0f1525;margin-bottom:1rem}
+.upload input{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:.5rem;margin-bottom:1rem}
+.card{position:relative;border-radius:8px;overflow:hidden;border:1px solid #1e2638;aspect-ratio:16/9;background:#000}
+.card img{width:100%;height:100%;object-fit:cover;display:block}
+.rm{position:absolute;top:3px;right:3px;background:rgba(74,108,247,.9);color:#fff;border:none;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:700}
+.styles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.4rem}
+.sc{padding:.6rem .7rem;border-radius:8px;border:1px solid #2a3350;background:#0f1525;color:#ccc;cursor:pointer;display:flex;align-items:center;gap:.4rem;font-size:.78rem}
+.sc.sel{background:#4a6cf7;color:#fff;border-color:#4a6cf7}
+.none{grid-column:1/-1;padding:.7rem;border-radius:8px;border:2px dashed #2a3350;text-align:center;font-size:.8rem;color:#7c85a3;cursor:pointer;margin-bottom:.4rem}
+.none.sel{border-color:#4a6cf7;border-style:solid;background:#101830;color:#4a6cf7;font-weight:600}
+.presets{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.5rem}
+.pp{padding:.3rem .6rem;border-radius:14px;border:1px solid #2a3350;background:#0f1525;color:#ccc;font-size:.7rem;cursor:pointer}
+.qs{background:#0f1525;border:1px solid #1e2638;border-radius:10px;padding:.6rem .8rem;margin-bottom:.4rem;font-size:.78rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.4rem;color:#ccc}
+.qi{display:flex;align-items:center;gap:.6rem;padding:.6rem .7rem;border-radius:8px;border:1px solid #1e2638;margin-bottom:.3rem;background:#0f1525;font-size:.8rem;color:#ccc}
+.qi.pending{opacity:.5}.qi.creating{border-color:#d97706}.qi.processing{border-color:#4a6cf7}.qi.done{border-color:#059669}.qi.failed{border-color:#dc2626}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.7rem;margin-top:1rem}
+.gi{border-radius:12px;overflow:hidden;border:1px solid #1e2638;background:#000}
+.gi video{width:100%;display:block;aspect-ratio:16/9;object-fit:cover}
+.gc{padding:.5rem .6rem;background:#0f1525;font-size:.7rem;color:#888;display:flex;justify-content:space-between;align-items:center}
+.gd{background:#4a6cf7;color:#fff;border:none;padding:.2rem .5rem;border-radius:5px;font-size:.62rem;font-weight:700}
+.sbar{position:fixed;bottom:0;left:0;right:0;background:#4a6cf7;color:#fff;padding:.7rem 1rem;font-size:.8rem;font-weight:700;display:flex;align-items:center;gap:.6rem;transform:translateY(100%);transition:transform .3s;z-index:100}
+.sbar.vis{transform:translateY(0)}
+.sp{width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;top:1rem;left:50%;transform:translateX(-50%) translateY(-100px);background:#4a6cf7;color:#fff;padding:.75rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:700;z-index:1000;opacity:0;transition:all .3s;max-width:90vw;text-align:center}
+.toast.vis{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.ok{background:#059669;color:#fff}.toast.err{background:#dc2626;color:#fff}.toast.warn{background:#d97706;color:#fff}
+label{display:block;font-size:.7rem;color:#7c85a3;text-transform:uppercase;font-weight:700;margin-bottom:.3rem;margin-top:.6rem}
+#nc,#nv{position:fixed;top:0;left:0;width:1px;height:1px;opacity:.01;pointer-events:none;z-index:-1}
+</style>
+</head>
+<body>
+<h1>Annonce Entreprise</h1>
+<p class="sub">Logo animé, équipe, vision, culture</p>
+<div class="info"><strong>Mode corporate :</strong> chaque image devient une vidéo d'annonce ou de présentation d'entreprise. Format 16:9.</div>
+
+<div class="panel" id="ap">
+<input type="password" id="ak" placeholder="Collez votre clé API (sk-...)" autocomplete="off">
+<button class="btn" id="as" type="button">Enregistrer la clé</button>
+<div class="status" id="ast"><span class="dot"></span><span id="astx">Aucune clé API enregistrée</span></div>
+<div style="font-size:.7rem;color:#7c85a3;margin-top:.4rem">Clé sur <a href="https://platform.agnes-ai.com" target="_blank" style="color:#4a6cf7">platform.agnes-ai.com</a></div>
+</div>
+
+<div class="upload" id="uz"><input type="file" id="fi" accept="image/*" multiple><div style="font-size:2rem;opacity:.5;margin-bottom:.4rem">＋</div><div style="font-weight:600">Ajoutez vos visuels corporate</div><div style="font-size:.75rem;color:#7c85a3">Logo, équipe, bureaux, produits</div></div>
+<div class="grid" id="ig"></div>
+
+<div class="panel">
+<div style="font-size:.75rem;font-weight:700;text-transform:uppercase;color:#7c85a3;margin-bottom:.5rem">Votre message</div>
+<div class="presets" id="pp"></div>
+<textarea id="mp" placeholder="Décrivez votre entreprise, sa vision, le message..."></textarea>
+</div>
+
+<div class="panel">
+<div style="font-size:.75rem;font-weight:700;text-transform:uppercase;color:#7c85a3;margin-bottom:.5rem">Style corporate</div>
+<div class="styles" id="sg"></div>
+</div>
+
+<div class="panel">
+<div style="font-size:.75rem;font-weight:700;text-transform:uppercase;color:#7c85a3;margin-bottom:.5rem">Réglages</div>
+<label>Durée</label>
+<select id="ds"><option value="121">5 secondes</option><option value="153" selected>6,4 secondes</option><option value="241">10 secondes</option></select>
+<label>Intensité</label>
+<select id="is"><option value="subtle" selected>Subtile (élégant)</option><option value="moderate">Modérée (dynamique)</option><option value="strong">Forte (impact)</option></select>
+</div>
+
+<button class="btn" id="gb" type="button" disabled>Créer les vidéos</button>
+<button class="btn btn-stop" id="sb" type="button">Arrêter</button>
+<div id="q"></div>
+<div id="gal" style="display:none"><div style="font-size:.75rem;font-weight:700;text-transform:uppercase;color:#7c85a3;margin:1rem 0 .6rem">Vidéos générées</div><div class="gal" id="gg"></div></div>
+
+<div class="sbar" id="sbar"><div class="sp"></div><span id="stx">Préparation…</span></div>
+<div class="toast" id="toast"><span id="ttx">Message</span></div>
+<canvas id="nc" width="2" height="2"></canvas>
+<video id="nv" playsinline muted loop></video>
+
+<script>
+// ============================================================
+// CLE API EN DUR - colle ta clé entre les guillemets si tu veux
+// ============================================================
+var HARDCODED_API_KEY = '';
+
+var API='https://apihub.agnes-ai.com/v1';
+var POLL='https://apihub.agnes-ai.com/agnesapi';
+var MODEL='agnes-video-v2.0';
+var FPS=24;
+var POLL_S=5,MAX_POLL=120;
+var KEY_LS='agnes_key_corp_v1';
+var MAXSZ=12*1024*1024,THW=200,MAXQ=50;
+
+var MEM_KEY='';
+var STORAGE_OK=true;
+try{localStorage.setItem('__t','1');localStorage.removeItem('__t');}catch(e){STORAGE_OK=false;}
+
+var state={
+  imgs:[], running:false, stop:false, queue:[], done:0, fail:0,
+  effect:null, prompt:'', intensity:'subtle',
+  frames:153, loading:false
+};
+
+var tT=null;
+function toast(m,t,d){t=t||'ok';d=d||2500;var e=document.getElementById('toast'),x=document.getElementById('ttx');if(!e)return;e.classList.remove('vis','ok','err','warn');void e.offsetWidth;x.textContent=m;e.classList.add('vis');if(t==='ok')e.classList.add('ok');else if(t==='err')e.classList.add('err');else e.classList.add('warn');if(tT)clearTimeout(tT);tT=setTimeout(function(){e.classList.remove('vis')},d);}
+
+function getKey(){
+  if(HARDCODED_API_KEY&&HARDCODED_API_KEY.trim())return HARDCODED_API_KEY.trim();
+  if(MEM_KEY)return MEM_KEY;
+  if(STORAGE_OK){try{return (localStorage.getItem(KEY_LS)||'').trim();}catch(e){return '';}}
+  return '';
+}
+function saveKey(){
+  var i=document.getElementById('ak');if(!i)return;
+  var k=(i.value||'').trim();
+  if(!k){MEM_KEY='';if(STORAGE_OK){try{localStorage.removeItem(KEY_LS);}catch(e){}}updApi();toast('Clé supprimée','warn');return;}
+  if(k.length<10){toast('Clé trop courte','err');return;}
+  MEM_KEY=k;
+  var saved=false;
+  if(STORAGE_OK){try{localStorage.setItem(KEY_LS,k);saved=true;}catch(e){}}
+  if(saved){toast('Clé enregistrée ✓','ok');}
+  else{toast('Clé active (session)','warn',4000);}
+  updApi();i.blur();
+}
+function updApi(){
+  var p=document.getElementById('ap'),i=document.getElementById('ak'),b=document.getElementById('as'),s=document.getElementById('ast'),t=document.getElementById('astx');
+  if(!p||!i||!s||!t)return;
+  p.classList.remove('ok','err','hard');s.classList.remove('ok','err','hard');
+  if(HARDCODED_API_KEY&&HARDCODED_API_KEY.trim()){
+    p.classList.add('hard');s.classList.add('hard');
+    var k=HARDCODED_API_KEY.trim();
+    t.textContent='🔑 Clé intégrée : '+k.slice(0,8)+'…'+k.slice(-4);
+    i.style.display='none';b.style.display='none';updBtn();return;
+  }
+  i.style.display='';b.style.display='';
+  var key=getKey();
+  if(key){p.classList.add('ok');s.classList.add('ok');t.textContent='✅ Clé active · '+key.slice(0,8)+'…'+key.slice(-4);}
+  else{t.textContent='Aucune clé API enregistrée';}
+  updBtn();
+}
+function updBtn(){
+  var b=document.getElementById('gb');if(!b)return;
+  var hk=!!getKey(),hi=state.imgs.length>0;
+  b.disabled=!hk||!hi||state.running||state.loading;
+  if(state.loading)b.textContent='Chargement…';
+  else if(state.running)b.textContent='Création… ('+(state.done+state.fail)+'/'+state.queue.length+')';
+  else if(!hk)b.textContent='Ajoutez votre clé API';
+  else if(!hi)b.textContent='Ajoutez des images';
+  else b.textContent='Créer '+state.imgs.length+' vidéo'+(state.imgs.length>1?'s':'');
+}
+
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+function setSt(t){var b=document.getElementById('sbar'),x=document.getElementById('stx');if(!b||!x)return;if(t){b.classList.add('vis');x.textContent=t;}else b.classList.remove('vis');}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+function fileUri(f){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(e){res(e.target.result);};r.onerror=function(){rej(new Error('err'));};r.readAsDataURL(f);});}
+function thumb(u){return new Promise(function(res){var i=new Image();i.onload=function(){try{var c=document.createElement('canvas'),ra=i.height/i.width;c.width=THW;c.height=Math.round(THW*ra);var x=c.getContext('2d');x.drawImage(i,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.7));}catch(e){res(u);}};i.onerror=function(){res(u);};i.src=u;});}
+async function procF(f){if(!f.type||f.type.indexOf('image/')!==0)return null;if(f.size>MAXSZ)return null;try{var u=await fileUri(f);var t=await thumb(u);return{u:u,t:t,id:Date.now()+Math.random()};}catch(e){return null;}}
+async function addFiles(fs){var arr=Array.from(fs).filter(function(f){return f.type&&f.type.indexOf('image/')===0;});if(!arr.length)return;state.loading=true;updBtn();for(var i=0;i<arr.length;i+=5){var batch=arr.slice(i,i+5);var rs=await Promise.all(batch.map(procF));for(var j=0;j<rs.length;j++){if(rs[j])state.imgs.push(rs[j]);}renderImgs();}state.loading=false;updBtn();}
+function rmImg(id){state.imgs=state.imgs.filter(function(x){return x.id!==id;});renderImgs();updBtn();}
+function renderImgs(){var g=document.getElementById('ig');if(!g)return;var h='';for(var i=0;i<state.imgs.length;i++){h+='<div class="card"><img src="'+state.imgs[i].t+'" loading="lazy"><button class="rm" data-r="'+state.imgs[i].id+'">✕</button></div>';}g.innerHTML=h;var bs=g.querySelectorAll('[data-r]');for(var k=0;k<bs.length;k++){bs[k].onclick=function(e){e.stopPropagation();rmImg(parseFloat(this.dataset.r));};}}
+
+var PRESETS=[
+{l:'Vision',t:'Montre la vision de l\'entreprise. Collaboration, ambition, mouvement vers l\'avant, plans larges sur les équipes.'},
+{l:'Équipe',t:'Présente l\'équipe. Poignées de main, sourires, échange de regards, dynamique de groupe, chaleur humaine.'},
+{l:'Startup',t:'Ambiance start-up moderne. Open space, tableaux blancs, post-it colorés, énergie créative, jeunes pousses.'},
+{l:'Corporate Luxe',t:'Codes du luxe. Bureaux en marbre, lumière dorée, costumes, gestes mesurés, élégance discrète.'},
+{l:'Tech',t:'Entreprise tech. Écrans de code, salles serveurs, câbles, LED bleutées, équipes concentrées.'},
+{l:'Industrie',t:'Site industriel. Chaînes de production, machines, ouvriers qualifiés, précision, force.'},
+{l:'Logo',t:'Animation de logo. Reflets lumineux, particules, ouverture de rideau, mise en scène minimaliste.'},
+{l:'Rapport annuel',t:'Présentation de résultats. Graphiques qui montent, chiffres, applaudissements, moment solennel.'}
+];
+var EFFECTS=[
+{id:'apple-keynote',n:'Keynote (Apple)',e:'🍎',d:'Minimal, épuré',p:'Apple keynote aesthetic, pure black background, sleek product reveal, minimal typography, cinematic lighting, premium tech announcement. Preserve the exact subject identity.'},
+{id:'google-color',n:'Google Coloré',e:'🎨',d:'Vif, humain',p:'Google corporate aesthetic, bright primary colors, people-focused shots, warm daylight offices, playful yet professional, human warmth. Preserve the exact subject identity.'},
+{id:'mckinsey',n:'McKinsey',e:'📊',d:'Sobre, exécutif',p:'McKinsey executive aesthetic, sober navy and grey palette, glass office towers, sharp suits, authoritative mood. Preserve the exact subject identity.'},
+{id:'startup-ny',n:'Start-up NY',e:'🚀',d:'Open space',p:'New York startup aesthetic, loft open space, brick walls, standing desks, coffee cups, energetic pace. Preserve the exact subject identity.'},
+{id:'silicon-valley',n:'Silicon Valley',e:'🌉',d:'Tech californienne',p:'Silicon Valley tech campus aesthetic, glass and wood, sunlit cafeterias, engineers collaborating, optimistic mood. Preserve the exact subject identity.'},
+{id:'bank-paris',n:'Banque Paris',e:'🏛️',d:'Prestige',p:'Parisian bank aesthetic, Haussmann architecture, marble floors, brass details, quiet power, classic elegance. Preserve the exact subject identity.'},
+{id:'luxury-milan',n:'Luxe Milan',e:'👔',d:'Mode, atelier',p:'Milan luxury aesthetic, atelier craftsmanship, silk, leather, warm interior lighting, refined gestures, Italian elegance. Preserve the exact subject identity.'},
+{id:'industry-ruhr',n:'Industrie Ruhr',e:'⚙️',d:'Acier, force',p:'Ruhr industrial aesthetic, steel structures, sparks, heavy machinery, bold workers, blue hour exterior shots. Preserve the exact subject identity.'},
+{id:'logistics',n:'Logistique',e:'📦',d:'Entrepôt, flux',p:'modern logistics aesthetic, vast warehouses, forklifts, pallets, drones, sense of scale and flow. Preserve the exact subject identity.'},
+{id:'hospitality',n:'Hôtellerie',e:'🛎️',d:'Accueil, élégance',p:'luxury hospitality aesthetic, grand lobby, brass and velvet, welcoming staff, warm dimmed light, discreet luxury. Preserve the exact subject identity.'},
+{id:'health',n:'Santé / MedTech',e:'⚕️',d:'Propre, humain',p:'modern healthcare aesthetic, clean white and teal palette, focused professionals, soft daylight, reassuring mood. Preserve the exact subject identity.'},
+{id:'renewable',n:'Énergie verte',e:'🌱',d:'Durable',p:'renewable energy corporate aesthetic, solar panels, wind turbines, green landscapes, optimistic blue sky, sustainable future. Preserve the exact subject identity.'}
+];
+
+function renderPresets(){var c=document.getElementById('pp');if(!c)return;var h='';for(var i=0;i<PRESETS.length;i++){h+='<div class="pp" data-p="'+i+'">'+esc(PRESETS[i].l)+'</div>';}c.innerHTML=h;var els=c.querySelectorAll('.pp');for(var j=0;j<els.length;j++){els[j].onclick=function(){var i=parseInt(this.dataset.p,10);var p=PRESETS[i];if(!p)return;var ta=document.getElementById('mp');ta.value=p.t;state.prompt=p.t;ta.focus();toast('Message appliqué','ok',1200);};}}
+function renderStyles(){var c=document.getElementById('sg');if(!c)return;var h='<div class="none '+(state.effect===null?'sel':'')+'" data-e="none">'+(state.effect===null?'✓ Aucun effet':'🚫 Aucun effet')+'</div>';for(var i=0;i<EFFECTS.length;i++){var s=EFFECTS[i];h+='<div class="sc '+(state.effect===s.id?'sel':'')+'" data-e="'+s.id+'"><div style="font-size:1.1rem">'+s.e+'</div><div><div style="font-weight:600">'+esc(s.n)+'</div><div style="font-size:.62rem;opacity:.65">'+esc(s.d)+'</div></div></div>';}c.innerHTML=h;var els=c.querySelectorAll('[data-e]');for(var j=0;j<els.length;j++){els[j].onclick=function(){var v=this.dataset.e;state.effect=(v==='none')?null:v;renderStyles();};}}
+
+var ACTIONS=[
+'people walk purposefully through a bright open space, exchanging smiles',
+'a handshake between two colleagues, confident and warm',
+'the camera glides past desks where teams work in focused silence',
+'a whiteboard fills with ideas, markers moving, energy building',
+'employees gather around a large window overlooking a city skyline',
+'a logo glows subtly on a wall, catching reflections of light',
+'sunlight sweeps through glass corridors, casting long warm shadows',
+'a leader addresses the room, all heads turn toward them'
+];
+var CAMS=[
+'slow dolly-in through a modern office corridor',
+'aerial reveal of a corporate campus at golden hour',
+'handheld follow behind a professional walking with purpose',
+'static locked-off wide shot of a meeting in progress',
+'slow 360 orbit around a small team in discussion',
+'camera tilts up from hands to faces, revealing scale'
+];
+var LIGHTS=[
+'bright natural daylight through floor-to-ceiling windows',
+'warm tungsten ambience in a refined meeting room',
+'cool modern LED lighting with subtle blue accents',
+'golden hour sun streaming across the office floor',
+'soft overcast daylight, evenly diffuse',
+'dramatic corporate spotlight with deep shadows'
+];
+var INTENS={subtle:'very subtle movement, restrained elegant motion',moderate:'moderate movement, dynamic corporate energy',strong:'strong movement, impactful corporate statement'};
+
+function buildPrompt(){
+  var e=state.effect?EFFECTS.filter(function(s){return s.id===state.effect;})[0]:null;
+  var p=[];
+  p.push('Animate this exact image as the starting frame of a corporate announcement video. The subjects and brand elements must remain IDENTICAL: same faces, same logo, same colors, same composition, same identity. Preserve framing. Only subtle motion, light and atmosphere are animated.');
+  if(e)p.push(e.p);
+  if(state.prompt&&state.prompt.trim())p.push('Message: '+state.prompt.trim());
+  p.push(INTENS[state.intensity]||INTENS.subtle);
+  p.push(pick(ACTIONS));
+  p.push(pick(CAMS));
+  p.push(pick(LIGHTS));
+  p.push('Cinematic corporate aesthetic, high production value, premium feel');
+  p.push('Sound design: minimal, subtle ambient, no music, no dialogue');
+  p.push('16:9 widescreen, 24fps, no text overlays, no watermarks');
+  return p.join('. ');
+}
+
+async function apiF(u,o){
+  for(var a=0;a<5;a++){
+    if(state.stop)throw new Error('Arrêt');
+    try{
+      var r=await fetch(u,o);
+      if(r.status===429){var w=[20,40,60,90,120][a];setSt('Rate limit… ('+w+'s)');await sleep(w*1000);continue;}
+      if(r.status===503){var w2=[5,10,15,20,30][a];setSt('Serveur occupé… ('+w2+'s)');await sleep(w2*1000);continue;}
+      return r;
+    }catch(e){
+      if(e.message==='Arrêt')throw e;
+      var w3=[3,5,10,20,30][a];
+      setSt('Connexion… ('+w3+'s)');
+      await sleep(w3*1000);
+    }
+  }
+  return fetch(u,o);
+}
+async function createTask(u,p){
+  var body={model:MODEL,prompt:p,image:u,num_frames:state.frames,frame_rate:FPS};
+  var r=await apiF(API+'/videos',{method:'POST',headers:{'Authorization':'Bearer '+getKey(),'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok){var t=await r.text();console.error('Création HTTP '+r.status,t);throw new Error('HTTP '+r.status+' — '+t.slice(0,150));}
+  var d=await r.json();
+  console.log('Réponse création:',d);
+  var id=d.video_id||d.id||d.task_id||d.taskId||(d.data&&(d.data.video_id||d.data.id||d.data.task_id));
+  if(!id){console.error('Pas de video_id',d);throw new Error('Pas de video_id');}
+  return id;
+}
+
+async function pollV(id,cb){
+  var urls=[
+    API+'/videos/'+encodeURIComponent(id),
+    API+'/videos/'+encodeURIComponent(id)+'/status',
+    API+'/videos?id='+encodeURIComponent(id),
+    API+'/videos?video_id='+encodeURIComponent(id),
+    API+'/tasks/'+encodeURIComponent(id),
+    POLL+'?id='+encodeURIComponent(id),
+    POLL+'?video_id='+encodeURIComponent(id)+'&model_name='+encodeURIComponent(MODEL),
+    POLL+'/video/'+encodeURIComponent(id),
+    POLL+'/'+encodeURIComponent(id),
+    'https://apihub.agnes-ai.com/v1/video/'+encodeURIComponent(id)
+  ];
+  var goodUrl=null,lastErr=null;
+  for(var attempt=0;attempt<MAX_POLL;attempt++){
+    if(state.stop)throw new Error('Arrêt');
+    if(attempt>0){
+      for(var r=POLL_S;r>0;r--){if(state.stop)throw new Error('Arrêt');cb('En attente… '+r+'s');await sleep(1000);}
+    }
+    if(!goodUrl){
+      for(var u=0;u<urls.length;u++){
+        try{
+          var res=await fetch(urls[u],{method:'GET',headers:{'Authorization':'Bearer '+getKey()}});
+          if(res.status===400||res.status===404)continue;
+          if(!res.ok)continue;
+          var d=await res.json();
+          console.log('Poll OK via',urls[u],d);
+          var s=d.status||d.state||(d.data&&d.data.status);
+          if(s===undefined&&d.progress===undefined&&!d.url)continue;
+          goodUrl=urls[u];
+          console.log('URL polling valide:',goodUrl);
+          if(handlePoll(d,cb))return d.__videoUrl__;
+          break;
+        }catch(e){lastErr=e;continue;}
+      }
+      if(!goodUrl)continue;
+    }else{
+      try{
+        var res2=await fetch(goodUrl,{method:'GET',headers:{'Authorization':'Bearer '+getKey()}});
+        if(res2.ok){
+          var d2=await res2.json();
+          if(handlePoll(d2,cb))return d2.__videoUrl__;
+        }
+      }catch(e){lastErr=e;}
+    }
+  }
+  throw new Error('Timeout'+(lastErr?' — '+lastErr.message:''));
+}
+function handlePoll(d,cb){
+  var s=d.status||d.state||(d.data&&d.data.status)||'unknown';
+  var prog=d.progress!==undefined?d.progress:(d.data&&d.data.progress!==undefined?d.data.progress:0);
+  cb('Création… '+prog+'%');
+  if(s==='completed'||s==='succeeded'||s==='done'||s==='success'||s==='finished'){
+    var v=(d.metadata&&d.metadata.url)||d.url||d.video_url||d.result_url||(d.output&&(d.output.url||d.output.video_url))||(d.data&&(d.data.url||d.data.video_url||(d.data.output&&d.data.output.url)))||(d.result&&(d.result.url||d.result.video_url));
+    if(!v)throw new Error('URL vidéo introuvable');
+    d.__videoUrl__=v;return true;
+  }
+  if(s==='failed'||s==='error'||s==='cancelled')throw new Error('Échec API : '+(d.error||d.message||s));
+  return false;
+}
+
+function renderQ(){var q=document.getElementById('q');if(!q)return;if(!state.queue.length){q.innerHTML='';return;}var tot=state.queue.length,dn=state.done+state.fail;var h='<div class="qs"><span style="font-weight:700">Progression : '+dn+'/'+tot+'</span><span style="color:#7c85a3">'+(dn<tot?'En cours':'Terminé')+'</span></div>';for(var i=0;i<state.queue.length&&i<MAXQ;i++){var it=state.queue[i];var ic='○',s='En attente',c='pending';if(it.st==='creating'){ic='◐';s='Préparation…';c='creating';}else if(it.st==='processing'){ic='◐';s=it.pr||'En cours';c='processing';}else if(it.st==='done'){ic='●';s='Terminé';c='done';}else if(it.st==='failed'){ic='✕';s=it.err||'Échec';c='failed';}h+='<div class="qi '+c+'"><div style="width:1.5rem;text-align:center">'+ic+'</div><div style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Image '+(it.i+1)+'</div><div style="font-size:.72rem;color:#888">'+esc(s)+'</div></div>';}q.innerHTML=h;}
+
+function addGal(u,l){var g=document.getElementById('gal'),gg=document.getElementById('gg');g.style.display='block';var el=document.createElement('div');el.className='gi';el.innerHTML='<video controls preload="metadata" muted playsinline><source src="'+u+'" type="video/mp4"></video><div class="gc"><span>'+esc(l)+'</span><button class="gd" data-u="'+u+'" data-n="'+esc(l)+'">MP4</button></div>';gg.appendChild(el);el.querySelector('.gd').onclick=async function(e){var url=this.dataset.u,nm=this.dataset.n;try{var r=await fetch(url);var b=await r.blob();var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='corp-'+nm.replace(/[^a-z0-9]/gi,'_')+'.mp4';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);}catch(err){window.open(url,'_blank');}};}
+
+async function taskOnly(item){item.st='creating';item.pr='Préparation…';renderQ();var p=buildPrompt();item.p=p;var id=await createTask(item.img.u,p);var u=await pollV(id,function(x){item.pr=x;renderQ();});return u;}
+
+async function startGen(){
+  if(state.running||!state.imgs.length)return;
+  if(!getKey()){toast('Ajoutez votre clé API','err');return;}
+  state.prompt=document.getElementById('mp').value.trim();
+  state.running=true;state.stop=false;state.done=0;state.fail=0;
+  state.queue=state.imgs.map(function(im,i){return{i:i,img:im,st:'pending',pr:null,url:null,p:null,err:null};});
+  document.getElementById('gg').innerHTML='';
+  document.getElementById('gal').style.display='none';
+  document.getElementById('sb').classList.add('vis');
+  document.getElementById('gb').disabled=true;
+  renderQ();updBtn();
+  var tasks=[];
+  try{
+    for(var i=0;i<state.queue.length;i++){
+      if(state.stop)break;
+      var item=state.queue[i];
+      try{
+        var u=await taskOnly(item);
+        item.st='done';item.url=u;item.pr='Terminé';state.done++;
+        renderQ();updBtn();
+        addGal(u,'Image '+(item.i+1));
+      }catch(e){
+        if(e.message==='Arrêt')break;
+        console.error('Item error:',e);
+        item.st='failed';item.pr='Échec';item.err=(e.message||'').slice(0,60);state.fail++;renderQ();updBtn();
+      }
+      if(i<state.queue.length-1&&!state.stop){
+        var w=62;
+        for(var r=w;r>0;r--){if(state.stop)break;setSt('Respiration… Image '+(i+2)+'/'+state.queue.length+' dans '+r+'s');await sleep(1000);}
+      }
+    }
+  }catch(e){console.error('Global:',e);}
+  state.running=false;state.stop=false;
+  setSt(state.stop?'Arrêté':'✦ '+state.done+'/'+state.queue.length+' vidéos ✦');
+  await sleep(3000);setSt(null);
+  document.getElementById('sb').classList.remove('vis');
+  updBtn();
+  toast(state.done+' vidéo'+(state.done>1?'s':'')+' créée'+(state.done>1?'s':''),'ok');
+}
+function stopGen(){if(!state.running)return;state.stop=true;setSt('Arrêt…');}
+
+(function(){
+  var as=document.getElementById('as');
+  if(as)as.addEventListener('click',saveKey);
+  var ak=document.getElementById('ak');
+  if(ak)ak.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();saveKey();}});
+  var sb=document.getElementById('sb');
+  if(sb)sb.addEventListener('click',stopGen);
+  var uz=document.getElementById('uz'),fi=document.getElementById('fi');
+  if(uz&&fi){uz.addEventListener('click',function(){fi.click();});fi.addEventListener('change',function(e){addFiles(e.target.files);fi.value='';});}
+  var mp=document.getElementById('mp');
+  if(mp)mp.addEventListener('input',function(e){state.prompt=e.target.value;});
+  var ds=document.getElementById('ds');
+  if(ds)ds.addEventListener('change',function(e){state.frames=parseInt(e.target.value,10);});
+  var is=document.getElementById('is');
+  if(is)is.addEventListener('change',function(e){state.intensity=e.target.value;});
+  var gb=document.getElementById('gb');
+  if(gb)gb.addEventListener('click',startGen);
+  updApi();renderPresets();renderStyles();renderImgs();renderQ();
+})();
+</script>
+</body>
+</html>
